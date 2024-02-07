@@ -1,0 +1,174 @@
+#This is what events trigger the workflow
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+    branches:
+      - main
+
+env:
+  ORCHESTRATOR_URL: https://github.com/am2558/aliro-orchestrator-dummy/pull/
+
+#what actions are happening during workflow
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    outputs:
+      closed: ${{ steps.close.outputs.closed }}
+      issue: ${{ steps.issue.outputs.issue }}
+    steps:
+      - name: Check if valid feature or bugfix branch
+        run: >
+          echo "VALID_BRANCH_NAME=$([[ ${{ github.head_ref }} =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]] 
+          && echo true)" >> $GITHUB_ENVf
+      - name: Get issue ID from branch name
+        run: echo "JIRA_ID=$(echo ${{ github.head_ref }} | sed 's/.*\(AQC-[0-9]\+\).*/\1/')" >> $GITHUB_ENV
+      - name: Output issue ID
+        id: issue
+        run: echo "issue=${{ env.JIRA_ID }}" >> $GITHUB_OUTPUT
+      - name: Get issue type from branch name
+        run: echo "ISSUE_TYPE=$(echo ${{ github.head_ref }} | sed 's/^\([^-]*\)-.*/\1/; /^\(BUGFIX\|FEATURE\)$/!d; s/.*/\0/')" >> $GITHUB_ENV
+      - name: Get author ID
+        run: echo "AUTHOR_ID=${{ toJson(fromJson(steps.get_commits.outputs.data)[0].author.id) }}" >> $GITHUB_ENV
+        # The Snyk bot is type "User", so here we check for the Snyk bot user ID, which is 19733683.
+        # The user ID can be found by checking the commits API, for example https://api.github.com/repos/aliro-technologies/aliro-orchestrator-frontend/pulls/224/commits
+      - name: Check if author is a bot
+        if: >
+          (contains(github.event.pull_request.user.type, 'Bot')
+          || contains(github.head_ref,'snyk-upgrade') 
+          || contains(github.head_ref,'snyk-fix')) 
+          && (contains(github.event.pull_request.user.type, 'Bot') 
+          || env.AUTHOR_ID == '19733683')
+        run: echo "BOT=True" >> $GITHUB_ENV
+      - name: Get issue details from Jira
+        if: "! env.BOT"
+        id: jira
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: "https://aliro.atlassian.net/rest/api/3/issue/${{ env.JIRA_ID }}"
+          method: "GET"
+          username: ${{ vars.ATLASSIAN_USERNAME }}
+          password: ${{ secrets.ATLASSIAN_API_TOKEN }}
+      - name: Check if valid issue type
+        if: >
+          '! env.BOT'
+          && (env.ISSUE_TYPE == 'FEATURE' 
+          && contains('Task,Story',fromJson(steps.jira.outputs.response).fields.issuetype.name) 
+          && contains(fromJson(steps.jira.outputs.response).fields.labels,'feature')) 
+          || (env.ISSUE_TYPE == 'BUGFIX' 
+          && contains('Bug',fromJson(steps.jira.outputs.response).fields.issuetype.name))
+        run: echo "VALID_ISSUE_TYPE=true" >> $GITHUB_ENV
+      # - name: Close the PR if it's not a valid branch
+      #   id: close
+      #   env:
+      #     COMMENT: "Only feature and bugfix branches may be merged to `main`.
+      #       Branch names must be prefixed with `FEATURE` or `BUGFIX` followed by the Jira issue number.
+      #       The Jira issue number must match an actual Jira bug, story, or task. `BUGFIX` branches must match bugs. `FEATURE` branches must match stories or tasks which are labeled `feature`.
+      #       Current valid `feature`s are on [this dashboard](https://aliro.atlassian.net/jira/dashboards/10105).
+      #       Hyphens are the only acceptable separator.
+      #       The following are examples of acceptable branch names.\n
+      #       `FEATURE-AQC-123-my-feature-branch`\n
+      #       `BUGFIX-AQC-5678-critical-fix-for-demo`"
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   if: >
+      #     (failure() || ! env.VALID_BRANCH_NAME || ! env.VALID_ISSUE_TYPE)
+      #     && (failure() || ! contains(github.event.pull_request.labels.*.name, 'exception'))
+      #     && ! env.BOT
+      #   run: |
+      #     #gh pr close ${ORCHESTRATOR_URL}${{ github.event.number }} --comment "$COMMENT"
+      #     echo "closed=true" >> $GITHUB_OUTPUT
+      #versioning
+      - name: Increment version number
+        run: |
+          python -c "
+          import os
+          import re
+          issue_type = env.ISSUE_TYPE
+          version_file = 'code/django/version.txt'
+          with open(version_file, 'r') as file:
+              version = file.read().strip()
+          match = re.match(r'(\d+)\.(\d+)\.(\d+)(-.+)?', version)
+          if match:
+              major, minor, patch, prerelease = match.groups()
+              if issue_type == 'FEATURE':
+                  minor = int(minor) + 1   
+              elif issue_type == 'BUGFIX':
+                  patch = int(patch) + 1  
+              new_version = f'{major}.{minor}.{patch}{prerelease or ""}'
+              with open(version_file, 'w') as file:
+                  file.write(new_version)
+          else:
+              raise ValueError('Version format not recognized')
+      - name: e2e checklist
+        env:
+          COMMENT: |
+            https://aliro.atlassian.net/browse/${{ needs.close.outputs.issue }}
+            # Merge checklist
+            Verify all of the following before merging to `main`.
+            - [ ] GUI
+            - - [ ] View a list of designs.
+            - - [ ] Click the + to create an empty design.
+            - - [ ] Add a QBTK-SPS node to the experiment by dragging it from the left panel.
+            - - [ ] Add a QBTK-PMA node to the experiment by dragging it from the left panel.
+            - - [ ] Link the nodes.
+            - - [ ] Navigate back to the design list and see the design you created.
+            - - [ ] Click the \"view\" button.
+            - - [ ] Expand the device type categories in the left panel, showing available device types.
+            - - [ ] View the design in the canvas, showing nodes including node names and links.
+            - - [ ] Double click the QBTK-SPS node to view the right node detail panel.
+            - - [ ] Open the \"Constraints\" dropdown.
+            - - [ ] Hover over the ports and see the port names.
+            - - [ ] Upload data/example_run_script.py as a run script.
+            - - [ ] Verify the design.
+            - - [ ] Click the \"run\" button, give the run a name and a duration, and execute the run.
+            - - [ ] View the progress bar, showing the estimated total time including init and deinit.
+            - - [ ] View the run logs, showing device init and deinit and run script logs.
+            - - [ ] After initialization, the logs will show `Running (run-duration=30s)...` . Confirm the duration matches the selected duration.
+            - - - [ ] If not testing run scripts, when you see this Running log, in the console navigate to `/code/epb_script` and run the script.
+            - - - [ ] If testing run scripts, verify that the run ends as soon as the run script finishes.
+            - - - [ ] If testing run scripts, download the run script data and verify the results.
+            - - [ ] View the design for the run, hover over the nodes to show the device assignments.
+            - - [ ] Hover over the links to show the link assignments.
+            - - [ ] Navigate to the Runs option in the menu and check that
+            - - - [ ] The created run is shown in the list
+            - - - [ ] The name corresponds to what was specified
+            - - - [ ] The run status is correct
+            - - - [ ] Clicking the \"View\" button opens the experiment run
+            - - [ ] For completed runs, check that the progress bar displays the completed status (CANCELED, INTERRUPTED, DONE)
+            - - [ ] Create a new experiment run and cancel it, see that the experiment status changes to deinitializing and then to CANCELED
+            - - [ ] To test the Dashboard
+            - - - [ ] Create a run to start sometime in the future (not Now)
+            - - - [ ] Navigate to the Dashboard and check that:
+            - - - - [ ] There is 1 in-progress experiment, or 1 completed experiment if the the first run has finished
+            - - - - [ ] There is 1 scheduled experiment
+            - - - - [ ] The "Next experiment begins in" section shows the correct remaining time for the next scheduled experiment to run
+            - - - - [ ] The "Recently viewed" section shows the last three viewed designs/runs, from latest to oldest
+            - - - - [ ] Creating a new experiment design by clicking the + button (bottom right) is successful
+            - - [ ] To test path constraints, go to the first design you created
+              - - [ ] Select a node and the link, see that a loss constraint box appears at the top of the canvas
+              - - [ ] Check that the box shows the selected path loss (this appears only if the design is valid)
+              - - [ ] Check that the box shows an input to set a loss constraint to the selected path
+              - - [ ] Set a loss constraint
+              - - [ ] Click anywhere on the canvas and verify that the constrained path is highlighted in yellow when the Show Path Constraints toggle is ON, and is not when turning it OFF
+              - - [ ] Select the constrained path again, see that the input shows the constraint you set
+              - - [ ] Now select only the node, see that the input shows a loss constraint of 0
+            - - [ ] To test user accounts, go to the customers tab
+              - - [ ] Create two customers
+              - - [ ] Click on the 'Users' button to go to the users list and create a new user, do this for both customers
+              - - [ ] Verify that the users are correctly listed under the corresponding customer users list
+              - - [ ] Log in as the first user you added and create a design
+              - - [ ] Go to the experiment designs list, see the created design
+              - - [ ] Log in as the second user and create a design
+              - - [ ] Go to the experiment designs list, verify that you can only see the design you just created, and not the design created by the first user
+              - - [ ] Log in as admin, go to the operators tab and create an operator
+              - - [ ] Log in as the operator, go to the experiment designs list and verify that you cannot see the 2 designs created by customer users
+            - - [ ] Go to the user preferences settings and generate an API Token
+            - - [ ] Run curl http://localhost:8000/api/experiment-designs/ -H "Accept: application/json" -H "Authorization: Bearer TOKEN_HERE" and make sure it's authorized
+            - [ ] Operations
+            - - [ ] Update the version in VERSION.txt
+            - - [ ] Update this checklist in protect-main.yaml if necessary.
+            - - [ ] Update ManualTypes.ts if there are API changes requiring type updates.
+            - - [ ] Update the README-ext.md if there is a corresponding configuration change required for production deployment.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr comment ${ORCHESTRATOR_URL}${{ github.event.number }} --body "$COMMENT"
