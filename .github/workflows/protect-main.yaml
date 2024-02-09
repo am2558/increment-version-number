@@ -24,7 +24,7 @@ jobs:
           import os
           import re
 
-          issue_type = "FEATURE"
+          issue_type = env.ISSUE_TYPE
           version_file = "version.txt"
           with open(version_file, "r") as file:
               version = file.read().strip()
@@ -37,9 +37,9 @@ jobs:
               print(major)
               print(minor)
               print(patch)
-              if issue_type == "FEATURE":
+              if issue_type == 'FEATURE':
                   minor = int(minor) + 1
-              elif issue_type == "BUGFIX":
+              elif issue_type == 'BUGFIX':
                   patch = int(patch) + 1
               new_version = f"{major}.{minor}.{patch}"
               with open(version_file, "w") as file:
