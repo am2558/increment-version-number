@@ -23,22 +23,26 @@ jobs:
           python -c "
           import os
           import re
-          issue_type = env.ISSUE_TYPE
-          version_file = 'version.txt'
-          with open(version_file, 'r') as file:
+
+          issue_type = "FEATURE"
+          version_file = "version.txt"
+          with open(version_file, "r") as file:
               version = file.read().strip()
-          match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
+          match = re.match(r"(\d+)\.(\d+)\.(\d+)", version)
           print("::notice:: foo")
           if match:
-              major = match.group(0)
-              minor = match.group(1)
-              patch = match.group(2)
-              if issue_type == 'FEATURE':
-                  minor = int(minor) + 1   
-              elif issue_type == 'BUGFIX':
-                  patch = int(patch) + 1  
-              new_version = f'{major}.{minor}.{patch}{prerelease or ""}'
-              with open(version_file, 'w') as file:
+              major = match.group(1)
+              minor = match.group(2)
+              patch = match.group(3)
+              print(major)
+              print(minor)
+              print(patch)
+              if issue_type == "FEATURE":
+                  minor = int(minor) + 1
+              elif issue_type == "BUGFIX":
+                  patch = int(patch) + 1
+              new_version = f"{major}.{minor}.{patch}"
+              with open(version_file, "w") as file:
                   file.write(new_version)
           else:
-              raise ValueError('Version format not recognized')
+              raise ValueError("Version format not recognized")
