@@ -28,6 +28,7 @@ jobs:
           with open(version_file, 'r') as file:
               version = file.read().strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)(-.+)?', version)
+          print(version)
           if match:
               major, minor, patch, prerelease = match.groups()
               if issue_type == 'FEATURE':
