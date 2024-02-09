@@ -48,4 +48,4 @@ jobs:
               with open(version_file, 'w') as file:
                   file.write(new_version)
           else:
-              raise ValueError('Version format not recognized')"
+              raise ValueError('Version format not recognized ' + version )"
