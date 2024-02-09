@@ -27,10 +27,10 @@ jobs:
           version_file = 'version.txt'
           with open(version_file, 'r') as file:
               version = file.read().strip()
-          match = re.match(r'(\d+)\.(\d+)\.(\d+)(-.+)?', version)
+          match = re.match(r'(\d+)\.(\d+)\.(\d+), version)
           print(version)
           if match:
-              major, minor, patch, prerelease = match.groups()
+              major, minor, patch = match.groups()
               if issue_type == 'FEATURE':
                   minor = int(minor) + 1   
               elif issue_type == 'BUGFIX':
