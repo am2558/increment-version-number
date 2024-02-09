@@ -24,7 +24,7 @@ jobs:
           import os
           import re
           issue_type = env.ISSUE_TYPE
-          version_file = 'code/django/version.txt'
+          version_file = 'version.txt'
           with open(version_file, 'r') as file:
               version = file.read().strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)(-.+)?', version)
