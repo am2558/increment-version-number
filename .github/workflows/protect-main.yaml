@@ -28,9 +28,11 @@ jobs:
           with open(version_file, 'r') as file:
               version = file.read().strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
-          print(version)
+          print("::notice:: foo")
           if match:
-              major, minor, patch = match.groups()[1:]
+              major = match.group(0)
+              minor = match.group(1)
+              patch = match.group(2)
               if issue_type == 'FEATURE':
                   minor = int(minor) + 1   
               elif issue_type == 'BUGFIX':
