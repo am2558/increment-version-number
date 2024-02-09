@@ -16,8 +16,8 @@ jobs:
     steps:
       - name: Check if valid feature or bugfix branch
         run: >
-          echo "VALID_BRANCH_NAME=$([[ ${{ github.head_ref }} =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]] 
-          && echo true)" >> $GITHUB_ENVf
+          echo "VALID_BRANCH_NAME=$([[ 'FEATURE-AQC-1111-first-pr' =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]] && echo true)" >> $GITHUB_ENV
+
       - name: Increment version number based on branch name
         run: |
           python -c "
