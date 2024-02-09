@@ -19,17 +19,18 @@ jobs:
           echo "VALID_BRANCH_NAME=$([[ 'FEATURE-AQC-1111-first-pr' =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]] && echo true)" >> $GITHUB_ENV
 
       - name: Increment version number based on branch name
+
         run: |
+          GH_ISSUE_TYPE = env.ISSUE_TYPE
           python -c "
           import os
           import re
 
-          issue_type = env.ISSUE_TYPE
+          issue_type = os.getenv("GH_ISSUE_TYPE")
           version_file = 'version.txt'
           with open(version_file, 'r') as file:
               version = file.read().strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
-          print('::notice:: foo')
           if match:
               major = match.group(1)
               minor = match.group(2)
