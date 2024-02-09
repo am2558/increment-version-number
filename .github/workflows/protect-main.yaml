@@ -26,7 +26,7 @@ jobs:
           import re
 
           issue_type = os.getenv('GH_ISSUE_TYPE')
-          version_file = '../../version.txt'
+          version_file = 'version.txt'
           with open(version_file, 'r') as file:
               version = file.read().strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
