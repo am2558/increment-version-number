@@ -30,7 +30,7 @@ jobs:
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
           print(version)
           if match:
-              major, minor, patch = match.groups()
+              major, minor, patch = match.groups()[1:]
               if issue_type == 'FEATURE':
                   minor = int(minor) + 1   
               elif issue_type == 'BUGFIX':
