@@ -41,6 +41,8 @@ jobs:
           with open(version_file, 'r') as file:
               version = file.read().strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
+          if not match: 
+            raise ValueError(match)
           if match:
               major = match.group(1)
               minor = match.group(2)
