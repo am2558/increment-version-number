@@ -4,7 +4,9 @@ import re
 issue_type = "FEATURE"
 version_file = ".github/workflows/version.txt"
 with open(version_file, "r") as file:
-    version = file.read().strip()
+    version = file.read()
+print(version)
+version = version.strip()
 match = re.match(r"(\d+)\.(\d+)\.(\d+)", version)
 if match:
     major = match.group(1)

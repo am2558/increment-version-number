@@ -18,18 +18,26 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Check if valid feature or bugfix branch
-        run: >
-          echo "VALID_BRANCH_NAME=$([[ 'FEATURE-AQC-1111-first-pr' =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]] && echo true)" >> $GITHUB_ENV
+        id: check_branch
+        run: |
+          if [[ '${{ github.head_ref }}' =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]]; then
+            echo "VALID_BRANCH_NAME=true" >> $GITHUB_ENV
+            if [[ '${{ github.head_ref }}' =~ FEATURE.* ]]; then
+              echo "GH_ISSUE_TYPE=FEATURE" >> $GITHUB_ENV
+            elif [[ '${{ github.head_ref }}' =~ BUGFIX.* ]]; then
+              echo "GH_ISSUE_TYPE=BUGFIX" >> $GITHUB_ENV
+            fi
+          else
+            echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
+          fi
 
       - name: Increment version number based on branch name
-
+        if: env.VALID_BRANCH_NAME == 'true'
         run: |
-          GH_ISSUE_TYPE=env.ISSUE_TYPE python -c "
+          python -c "
           import os
           import re
-
-          issue_type = os.getenv('GH_ISSUE_TYPE')
-          version_file = 'version.txt'
+          version_file='version.txt'
           with open(version_file, 'r') as file:
               version = file.read().strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
@@ -37,15 +45,12 @@ jobs:
               major = match.group(1)
               minor = match.group(2)
               patch = match.group(3)
-              print(major)
-              print(minor)
-              print(patch)
-              if issue_type == 'FEATURE':
+              if '${{ env.GH_ISSUE_TYPE }}' == 'FEATURE':
                   minor = int(minor) + 1
-              elif issue_type == 'BUGFIX':
+              elif '${{ env.GH_ISSUE_TYPE }}' == 'BUGFIX':
                   patch = int(patch) + 1
               new_version = f'{major}.{minor}.{patch}'
               with open(version_file, 'w') as file:
                   file.write(new_version)
           else:
-              raise ValueError('Version format not recognized ' + version + '.')"
+              raise ValueError('Version format not recognized: ' + version)"
