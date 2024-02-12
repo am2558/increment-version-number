@@ -42,7 +42,6 @@ jobs:
           with open(version_file, 'r') as file:
               version = file.read()
               print(f'::debug::{version}')
-              version = version.strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
           if not match: 
             raise ValueError(match)
