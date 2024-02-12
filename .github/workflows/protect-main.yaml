@@ -30,6 +30,8 @@ jobs:
           else
             echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
           fi
+      - name: Read the file
+        run: echo $(cat version.txt)
       - name: Increment version number based on branch name
         if: env.VALID_BRANCH_NAME == 'true'
         run: |
