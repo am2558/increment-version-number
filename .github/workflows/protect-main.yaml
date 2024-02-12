@@ -36,7 +36,9 @@ jobs:
           python -c "
           import os
           import re
-          version_file='.github/workflows/version.txt'
+
+          version_file='version.txt'
+           print(f'::debug::{os.getcwd()}')
           with open(version_file, 'r') as file:
               version = file.read()
               print(f'::debug::{version}')
