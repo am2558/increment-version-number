@@ -30,7 +30,6 @@ jobs:
           else
             echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
           fi
-
       - name: Increment version number based on branch name
         if: env.VALID_BRANCH_NAME == 'true'
         run: |
@@ -39,7 +38,10 @@ jobs:
           import re
           version_file='version.txt'
           with open(version_file, 'r') as file:
-              version = file.read().strip()
+              version = file.read()
+              print('::debug::version')
+
+              version = version.strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
           if not match: 
             raise ValueError(match)
