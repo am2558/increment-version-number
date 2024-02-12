@@ -39,9 +39,9 @@ jobs:
 
           version_file='/home/runner/work/increment-version-number/increment-version-number/version.txt'
           print(f'::debug::{os.getcwd()}')
-          with open(version_file, 'r') as file:
-              version = file.read()
-              print(f'::debug::{version}')
+          file =  open(version_file, 'r')
+          version = file.read()
+          print(f'::debug::{version}')
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
           if not match: 
             raise ValueError(match)
