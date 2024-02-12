@@ -1,11 +1,12 @@
 name: Protect Main and Auto-version
 
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+    branches:
+      - main
 jobs:
   close:
     runs-on: ubuntu-latest
@@ -13,7 +14,7 @@ jobs:
       closed: ${{ steps.close.outputs.closed }}
       issue: ${{ steps.issue.outputs.issue }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Check if valid feature or bugfix branch
@@ -29,8 +30,6 @@ jobs:
           else
             echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
           fi
-      - name: Read the file
-        run: echo $(cat version.txt)
       - name: Increment version number based on branch name
         if: env.VALID_BRANCH_NAME == 'true'
         run: |
