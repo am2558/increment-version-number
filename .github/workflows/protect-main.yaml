@@ -39,8 +39,7 @@ jobs:
           version_file='version.txt'
           with open(version_file, 'r') as file:
               version = file.read()
-              print('::debug::version')
-
+              print(f'::debug::{version}')
               version = version.strip()
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
           if not match: 
