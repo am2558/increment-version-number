@@ -40,7 +40,7 @@ jobs:
           version_file='/home/runner/work/increment-version-number/increment-version-number/version.txt'
           print(f'::debug::{os.getcwd()}')
           file =  open(version_file, 'r')
-          version = file.read()
+          version = file.readlines()
           print(f'::debug::{version}')
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
           if not match: 
