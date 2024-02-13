@@ -2,7 +2,7 @@ import os
 import re
 
 issue_type = "FEATURE"
-version_file = ".github/workflows/version.txt"
+version_file = "version.txt"
 with open(version_file, "r") as file:
     version = file.read()
 print(version)
