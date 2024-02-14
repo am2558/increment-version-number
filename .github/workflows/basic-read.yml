@@ -43,4 +43,5 @@ jobs:
           python -c "
           with open('text.txt') as f:
             print(f.read())
+            print('hello')
           "
