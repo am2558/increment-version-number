@@ -37,7 +37,7 @@ jobs:
           import os
           import re
 
-          version_file='version.txt'
+          version_file='.github/workflows/version.txt'
           print(f'::debug::{os.getcwd()}')
           file =  open(version_file, 'r')
           version = file.readlines()
