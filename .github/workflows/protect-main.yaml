@@ -40,7 +40,8 @@ jobs:
           version_file='.github/workflows/version.txt'
           print(f'::debug::{os.getcwd()}')
           file =  open(version_file, 'r')
-          version = file.readlines()
+          version_lines = file.readlines()
+          version = version_lines[0].strip()
           print(f'::debug::{version}')
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
           if not match: 
