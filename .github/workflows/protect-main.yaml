@@ -43,7 +43,7 @@ jobs:
           version_lines = file.readlines()
           file.close()
           version = version_lines[0].strip()
-          print(f'::debug::{version}')
+          print(f'::debug::{version} version file before incrementing')
           match = re.match(r'(\d+)\.(\d+)\.(\d+)', version)
           if not match: 
             raise ValueError(match)
