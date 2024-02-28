@@ -54,12 +54,12 @@ jobs:
               minor = match.group(2)
               patch = match.group(3)
               print(f'::debug::${{github.event.label.name}}')
-              if ${{ github.event.label.name != null }}:
-                if ${{ github.event.label.name == 'Major Version' }}:
+              if ${{ github.event.label.name}} != null :
+                if ${{ github.event.label.name}} == 'Major Version' :
                   major = int(major) + 1
-                if ${{ github.event.label.name == 'Minor Version' }}:
+                if ${{ github.event.label.name}} == 'Minor Version' :
                   minor = int(minor) + 1
-                if ${{ github.event.label.name == 'Bugfix Version' }}:
+                if ${{ github.event.label.name}} == 'Bugfix Version' :
                   patch = int(major) + 1 
               else:
                 if '${{ env.GH_ISSUE_TYPE }}' == 'FEATURE':
