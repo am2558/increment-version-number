@@ -54,7 +54,7 @@ jobs:
               minor = match.group(2)
               patch = match.group(3)
               print(f'::debug::${{github.event.label.name}}')
-              if ${{ github.event.label.name}} != null :
+              if ${{ github.event.label.name}} not null :
                 if ${{ github.event.label.name}} == 'Major Version' :
                   major = int(major) + 1
                 if ${{ github.event.label.name}} == 'Minor Version' :
