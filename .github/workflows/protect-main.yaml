@@ -7,6 +7,7 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+    types: [labeled]
 jobs:
   close:
     runs-on: ubuntu-latest
