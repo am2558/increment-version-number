@@ -6,7 +6,7 @@ version_file = "version.txt"
 with open(version_file, "r") as file:
     version = file.read()
 print(version)
-version = version.strip()
+version = version.strip() 
 match = re.match(r"(\d+)\.(\d+)\.(\d+)", version)
 if match:
     major = match.group(1)
