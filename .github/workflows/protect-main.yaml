@@ -5,6 +5,7 @@ on:
       - closed
 
 jobs:
+
   close:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
@@ -76,6 +77,7 @@ jobs:
               raise ValueError('Version format not recognized: ' + version)"
       - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         with:
+          ref: main
           # The arguments for the `git add` command (see the paragraph below for more info)
           # Default: '.'
           add: "version.txt"
