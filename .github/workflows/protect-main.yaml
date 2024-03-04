@@ -1,17 +1,12 @@
 name: Protect Main and Auto-version
-
-# Controls when the workflow will run
-on: 
-  workflow_dispatch:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: ["main"]
-  # pull_request:
-  #   branches: ["main"]
-  #   types: [labeled]
+on:
+  pull_request:
+    types:
+      - closed
 
 jobs:
   close:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       closed: ${{ steps.close.outputs.closed }}
