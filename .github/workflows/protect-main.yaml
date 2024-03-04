@@ -56,6 +56,7 @@ jobs:
           if not match: 
             raise ValueError(match)
           if match:
+          #apply label to PR
               major = match.group(1)
               minor = match.group(2)
               patch = match.group(3)
