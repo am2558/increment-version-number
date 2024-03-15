@@ -17,6 +17,8 @@ jobs:
             echo "::set-output name=LABEL::Bugfix Version"
           elif [[ "$BRANCH_NAME" =~ FEATURE-AQC-[0-9]+-.+ ]]; then
             echo "::set-output name=LABEL::Minor Version"
+          elif [[ "$BRANCH_NAME" =~ TQA-[0-9]+-.+ ]]; then
+            echo "::set-output name=LABEL::Bugfix Version"
           else
             echo "No specific branch pattern matched."
             echo "::set-output name=LABEL::"
