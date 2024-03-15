@@ -58,12 +58,13 @@ jobs:
               patch = match.group(3)
               pr_label = os.getenv('PR_LABEL')
               print(f'PR Label: {pr_label}')
-              if pr_label:
-                if pr_label == 'Major Version':
+
+              if (len(pr_label) == 1):
+                if pr_label[0] == 'Major Version':
                     major = int(major) + 1
-                elif pr_label == 'Minor Version':
+                elif pr_label[0] == 'Minor Version':
                     minor = int(minor) + 1
-                elif pr_label == 'Bugfix Version':
+                elif pr_label[0] == 'Bugfix Version':
                     patch = int(patch) + 1
               else:
                 if '${{ env.GH_ISSUE_TYPE }}' == 'FEATURE':
