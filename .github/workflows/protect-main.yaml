@@ -30,7 +30,7 @@ jobs:
             echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
           fi
       - name: Set PR_LABEL environment variable
-        run: echo "PR_LABEL=${{ github.event.label.name }}" >> $GITHUB_ENV
+        run: echo "PR_LABEL=${{ github.event.pull_request.labels }}" >> $GITHUB_ENV
          #triggered on merge to main
       - name: Increment version number based on branch name
         if: env.VALID_BRANCH_NAME == 'true' 
