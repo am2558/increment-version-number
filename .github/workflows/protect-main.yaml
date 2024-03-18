@@ -58,8 +58,7 @@ jobs:
               patch = match.group(3)
               pr_label = os.getenv('PR_LABEL')
               label = pr_label[0]
-              print(f'PR Label: {pr_label}')
-
+              print(f'PR Label: {label}')
               if (len(pr_label) == 1):
                 if pr_label[0] == 'Major Version':
                     major = int(major) + 1
