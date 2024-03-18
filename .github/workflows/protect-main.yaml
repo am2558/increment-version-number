@@ -57,6 +57,7 @@ jobs:
               minor = match.group(2)
               patch = match.group(3)
               pr_label = os.getenv('PR_LABEL')
+              label = pr_label[0]
               print(f'PR Label: {pr_label}')
 
               if (len(pr_label) == 1):
