@@ -29,8 +29,8 @@ jobs:
           else
             echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
           fi
-      - name: Set PR_LABEL environment variable
-        run: echo "PR_LABEL=${{ github.event.pull_request.labels }}" >> $GITHUB_ENV
+      - name: Set PR_LABEL environment variable 
+        run: echo "PR_LABEL=${{ toJson(github.event.pull_request.labels.*.name) }}" >> $GITHUB_ENV
          #triggered on merge to main
       - name: Increment version number based on branch name
         if: env.VALID_BRANCH_NAME == 'true' 
@@ -40,6 +40,7 @@ jobs:
           python -c "
           import os
           import re
+          import json
           version_file='version.txt'
           print(f'::debug::{os.getcwd()}')
           
@@ -56,15 +57,16 @@ jobs:
               major = match.group(1)
               minor = match.group(2)
               patch = match.group(3)
-              pr_label = os.getenv('PR_LABEL')
-              label = pr_label[0]
-              print(f'PR Label: {label}')
-              if (len(pr_label) == 1):
+              pr_label_json = os.getenv('PR_LABEL')
+              pr_labels = json.loads(pr_label_json)
+              print(f'PR Label: {pr_labels}')
+              
+              if (len(pr_labels) == 1):
                 if pr_label[0] == 'Major Version':
                     major = int(major) + 1
-                elif pr_label[0] == 'Minor Version':
+                elif pr_labels[0] == 'Minor Version':
                     minor = int(minor) + 1
-                elif pr_label[0] == 'Bugfix Version':
+                elif pr_labels[0] == 'Bugfix Version':
                     patch = int(patch) + 1
               else:
                 if '${{ env.GH_ISSUE_TYPE }}' == 'FEATURE':
