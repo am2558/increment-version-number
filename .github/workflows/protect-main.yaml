@@ -63,12 +63,12 @@ jobs:
               patch = match.group(3)
               pr_label = os.getenv('PR_LABEL')
               print(f'PR Label: {pr_label}')
-                if pr_label[0] == 'Major Version':
-                    major = int(major) + 1
-                elif pr_labels[0] == 'Minor Version':
-                    minor = int(minor) + 1
-                elif pr_labels[0] == 'Bugfix Version':
-                    patch = int(patch) + 1
+              if pr_label[0] == 'Major Version':
+                  major = int(major) + 1
+              elif pr_labels[0] == 'Minor Version':
+                  minor = int(minor) + 1
+              elif pr_labels[0] == 'Bugfix Version':
+                  patch = int(patch) + 1
           
               new_version = f'{major}.{minor}.{patch}'
               with open(version_file, 'w') as file:
