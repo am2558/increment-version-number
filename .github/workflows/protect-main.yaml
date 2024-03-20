@@ -31,7 +31,7 @@ jobs:
           fi
       - name: Set PR_LABEL environment variable 
         run: |
-            PR_LABEL_JSON=${{ toJson(github.event.pull_request.labels.*.name) }}
+            PR_LABEL_JSON='${{ toJson(github.event.pull_request.labels.*.name) }}'
             PR_LABEL=$(echo $PR_LABEL_JSON | jq -r '.[0]')
             echo $PR_LABEL
             echo "PR_LABEL=$PR_LABEL" >> $GITHUB_ENV
