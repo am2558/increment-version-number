@@ -33,6 +33,7 @@ jobs:
         run: |
             PR_LABEL_JSON=${{ toJson(github.event.pull_request.labels.*.name) }}
             PR_LABEL=$(echo $PR_LABEL_JSON | jq -r '.[0]')
+             echo $PR_LABEL
             echo "PR_LABEL=$PR_LABEL" >> $GITHUB_ENV
          #triggered on merge to main
       - name: Increment version number based on branch name
