@@ -29,7 +29,7 @@ jobs:
           fi
       - name: Fetch pull request details
         id: pr_details
-        uses: octokit/request-action@v2
+        uses: octokit/request-action@v2.x
         if: env.VALID_BRANCH_NAME == 'true'
         with:
           route: GET /repos/${{ github.repository }}/pulls
