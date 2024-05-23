@@ -15,6 +15,7 @@ jobs:
       - name: Check if valid feature or bugfix branch
         id: check_branch
         run: |
+          echo "Current branch name: ${{ github.head_ref }}"
           if [[ '${{ github.head_ref }}' =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]]; then
             echo "VALID_BRANCH_NAME=true" >> $GITHUB_ENV
             if [[ '${{ github.head_ref }}' =~ FEATURE.* ]]; then
