@@ -95,7 +95,7 @@ jobs:
 
       - uses: EndBug/add-and-commit@v9
         with:
-          ref: main
+          ref: ${{ github.ref }}
           add: "code/django/version.txt"
           author_name: am2558
           author_email: am2558@cornell.edu
@@ -106,4 +106,5 @@ jobs:
           default_author: github_actor
           fetch: true
           message: "increment version number"
-          new_branch: m
+          pathspec_error_handling: exitImmediately
+          push: true
