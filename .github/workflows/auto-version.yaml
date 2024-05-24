@@ -11,6 +11,7 @@ jobs:
       issue: ${{ steps.issue.outputs.issue }}
     steps:
       - uses: actions/checkout@v4
+      
       - name: Check if valid feature or bugfix branch
         id: check_branch
         run: |
@@ -31,12 +32,27 @@ jobs:
             echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
           fi
 
-      - name: Set PR_LABEL environment variable
+      - name: Fetch pull request details
+        id: pr_details
+        uses: octokit/request-action@v2.x
+        if: env.VALID_BRANCH_NAME == 'true'
+        with:
+          route: GET /repos/${{ github.repository }}/pulls
+          parameters: |
+            {
+              "head": "${{ github.repository }}:${branch_name}",
+              "state": "open"
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract PR labels
+        id: extract_labels
         run: |
-          PR_LABEL_JSON='${{ toJson(github.event.pull_request.labels.*.name) }}'
-          PR_LABEL=$(echo $PR_LABEL_JSON | jq -r '.[0]')
+          PR_LABEL_JSON=$(echo '${{ steps.pr_details.outputs.data }}' | jq '.[0].labels')
+          PR_LABEL=$(echo $PR_LABEL_JSON | jq -r '.[0].name')
           echo "PR_LABEL=$PR_LABEL" >> $GITHUB_ENV
-          
+
       - name: Increment version number based on branch name
         if: env.VALID_BRANCH_NAME == 'true'
         run: |
@@ -76,8 +92,8 @@ jobs:
           with open(version_file, 'w') as file:
               file.write(new_version)
           print(f'::debug::New version: {new_version}')"
-          
-      - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+
+      - uses: EndBug/add-and-commit@v9
         with:
           ref: main
           add: "code/django/version.txt"
@@ -85,4 +101,9 @@ jobs:
           author_email: am2558@cornell.edu
           commit: --signoff
           committer_name: am2558
-         
+          committer_email: am2558@cornell.edu
+          cwd: "."
+          default_author: github_actor
+          fetch: true
+          message: "increment version number"
+          new_branch: m
