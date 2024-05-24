@@ -19,7 +19,7 @@ jobs:
           branch_name="${{ github.ref }}"
           branch_name=${branch_name#refs/heads/}
           echo "Current branch name: $branch_name"
-          if [[ "$branch_name" =~ (FEATURE|BUGFIX|TQA)-AQC-[0-9]+-.+ ]]; then
+          if [[ "$branch_name" =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]] || [[ "$branch_name" =~ TQA-[0-9]+-.+ ]]; then
             echo "VALID_BRANCH_NAME=true" >> $GITHUB_ENV
             if [[ "$branch_name" =~ FEATURE.* ]]; then
               echo "GH_ISSUE_TYPE=FEATURE" >> $GITHUB_ENV
