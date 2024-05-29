@@ -54,6 +54,7 @@ jobs:
           echo "PR_LABEL=$PR_LABEL" >> $GITHUB_ENV
 
       - name: Increment version number based on branch name
+        id: bump_version
         if: env.VALID_BRANCH_NAME == 'true'
         run: |
           python -c "
@@ -92,6 +93,12 @@ jobs:
           with open(version_file, 'w') as file:
               file.write(new_version)
           print(f'::debug::New version: {new_version}')"
+      
+      - name: Create GitHub Tag
+        id: tag_version
+        run: |
+          git tag v${{ steps.bump_version.outputs.new_version }}
+          git push origin v${{ steps.bump_version.outputs.new_version }}
 
       - uses: EndBug/add-and-commit@v9
         with:
