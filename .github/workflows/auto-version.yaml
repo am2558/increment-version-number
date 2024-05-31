@@ -137,3 +137,4 @@ jobs:
           tags: |
             quay.io/aliro-technologies/aliro-orchestrator:${{ steps.bump_version.outputs.new_version }}
             quay.io/aliro-technologies/aliro-orchestrator:latest
+ 
