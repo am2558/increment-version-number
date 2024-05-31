@@ -93,13 +93,18 @@ jobs:
           with open(version_file, 'w') as file:
               file.write(new_version)
           print(f'::debug::New version: {new_version}')
-          print(f'::set-output name=new_version::{new_version}')"        
-      
+          print(f'::set-output name=new_version::{new_version}')"
+      - name: Read version
+        run: |
+          VERSION="$(cat code/django/VERSION.txt)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV            
       - name: Create GitHub Tag
         id: tag_version
         run: |
-          git tag v${{ steps.bump_version.outputs.new_version }}
-          git push origin v${{ steps.bump_version.outputs.new_version }}
+          echo "New version: ${{ env.VERSION }}"
+          git tag v${{ env.VERSION }}
+          git push origin v${{ env.VERSION }}
 
       - uses: EndBug/add-and-commit@v9
         with:
