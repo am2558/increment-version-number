@@ -1,4 +1,4 @@
-name: Auto-version
+\name: Auto-version
 on:
   workflow_dispatch:
 
@@ -94,7 +94,9 @@ jobs:
               file.write(new_version)
           print(f'::debug::New version: {new_version}')
           print(f'::set-output name=new_version::{new_version}')
-          print(f'NEW_VERSION={new_version}' >> $GITHUB_ENV)"
+          os.environ['NEW_VERSION'] = new_version
+          with open(os.environ['GITHUB_ENV'], 'a') as env_file:
+              env_file.write(f'NEW_VERSION={new_version}\n')"
 
       - name: Create GitHub Tag
         id: tag_version
