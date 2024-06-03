@@ -1,4 +1,4 @@
-\name: Auto-version
+name: Auto-version
 on:
   workflow_dispatch:
 
