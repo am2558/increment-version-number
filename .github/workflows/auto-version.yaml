@@ -121,18 +121,18 @@ jobs:
           pathspec_error_handling: exitImmediately
           push: true
 
-      # - name: Login to Quay.io
-      #   uses: docker/login-action@v2
-      #   with:
-      #     registry: quay.io
-      #     username: ${{ vars.QUAY_USERNAME }}
-      #     password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+      - name: Login to Quay.io
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ vars.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_ROBOT_TOKEN }}
 
-      # - name: Build and push Docker image
-      #   uses: docker/build-push-action@v4
-      #   with:
-      #     context: .
-      #     push: true
-      #     tags: |
-      #       quay.io/aliro-technologies/aliro-orchestrator:${{ steps.bump_version.outputs.new_version }}
-      #       quay.io/aliro-technologies/aliro-orchestrator:latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            quay.io/aliro-technologies/aliro-orchestrator:${{ env.NEW_VERSION }}
+            quay.io/aliro-technologies/aliro-orchestrator:latest
