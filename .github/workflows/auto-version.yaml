@@ -134,5 +134,5 @@ jobs:
           context: .
           push: true
           tags: |
-            quay.io/aliro-technologies/aliro-orchestrator:${{ env.NEW_VERSION }}
-            quay.io/aliro-technologies/aliro-orchestrator:latest
+              quay.io/am2558/aliro-orchestrator-fake:${{ env.NEW_VERSION }}
+              quay.io/am2558/aliro-orchestrator-fake:latest
