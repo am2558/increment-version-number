@@ -1,0 +1,5 @@
+[tool.towncrier]
+directory = "newsfragments"
+package = "my_package"
+
+filename = "NEWS.rst"
