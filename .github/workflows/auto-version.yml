@@ -97,7 +97,7 @@ jobs:
           os.environ['NEW_VERSION'] = new_version
           with open(os.environ['GITHUB_ENV'], 'a') as env_file:
               env_file.write(f'NEW_VERSION={new_version}\n')"
-              
+
       - name: Trigger Release Notes Workflow
         uses: benc-uk/workflow-dispatch@v1
         with:
@@ -105,8 +105,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.ref }}
           inputs: |
-            branch=${{ github.event.inputs.branch }}
-            version=${{ steps.bump_version.outputs.new_version }}
+            {
+              "branch": "${{ github.event.inputs.branch }}",
+              "version": "${{ steps.bump_version.outputs.new_version }}"
+            }
 
       - name: Create GitHub Tag
         id: tag_version
