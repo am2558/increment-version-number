@@ -36,5 +36,5 @@ jobs:
 
       - name: Build release notes
         run: |
-        pwd
-        towncrier build --version ${{ github.event.inputs.version }}
+          pwd
+          towncrier build --version ${{ github.event.inputs.version }}
