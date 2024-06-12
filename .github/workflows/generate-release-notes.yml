@@ -32,4 +32,6 @@ jobs:
           BRANCH_NAME: ${{ github.event.inputs.branch }}
 
       - name: Build release notes
-        run: towncrier build --version ${{ github.event.inputs.branch }}
+        run: |
+          pwd
+          towncrier build --version ${{ github.event.inputs.branch }}
