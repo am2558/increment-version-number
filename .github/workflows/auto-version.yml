@@ -116,6 +116,9 @@ jobs:
           echo "New version: ${{ env.NEW_VERSION }}"
           git tag v${{ env.NEW_VERSION }}
           git push origin v${{ env.NEW_VERSION }}
+      
+      - name: Debug - Print NEWS.rst
+        run: cat NEWS.rst
 
       - uses: EndBug/add-and-commit@v9
         with:
