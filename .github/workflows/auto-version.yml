@@ -75,7 +75,7 @@ jobs:
           pr_label = os.getenv('PR_LABEL')
           print(f'PR Label: {pr_label}')
           if pr_label:
-              if pr_label == 'Major Version':
+              if pr_label == 'Major Version': 
                   major = int(major) + 1
               elif pr_label == 'Minor Version':
                   minor = int(minor) + 1
