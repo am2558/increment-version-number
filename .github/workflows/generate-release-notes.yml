@@ -27,6 +27,9 @@ jobs:
 
       - name: Install dependencies
         run: pip install towncrier requests
+        
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/my_package" >> $GITHUB_ENV
 
       - name: Generate news fragments
         run: python generate_news_fragments.py
