@@ -7,6 +7,9 @@ on:
         description: 'Branch name'
         required: true
         default: 'main'
+      version:
+        description: 'Release version'
+        required: true
 
 jobs:
   release-notes:
@@ -25,6 +28,14 @@ jobs:
       - name: Install dependencies
         run: pip install towncrier requests
 
+      - name: Debug
+        run: |
+          ls -R
+          pwd
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/my_package" >> $GITHUB_ENV
+
       - name: Generate news fragments
         run: python generate_news_fragments.py
         env:
@@ -34,4 +45,4 @@ jobs:
       - name: Build release notes
         run: |
           pwd
-          towncrier build --version ${{ github.event.inputs.branch }}
+          towncrier build --version ${{ github.event.inputs.version }} --yes

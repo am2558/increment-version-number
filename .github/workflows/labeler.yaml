@@ -1,12 +1,11 @@
 name: Automatic PR Labeler
-
 on:
   pull_request:
     types: [opened, reopened]
 
 jobs:
   label-pr:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
     steps:
       - name: Extract branch type from PR title
         id: branch-type
