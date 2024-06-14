@@ -120,7 +120,6 @@ jobs:
       - uses: EndBug/add-and-commit@v9
         with:
           ref: ${{ github.ref }}
-          add: "code/django/version.txt"
           author_name: am2558
           author_email: am2558@cornell.edu
           commit: --signoff
