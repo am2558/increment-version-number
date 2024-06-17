@@ -49,7 +49,8 @@ jobs:
 
       - uses: EndBug/add-and-commit@v9
         with:
-          ref: ${{ github.ref }}
+          repository: ${{ github.event.pull_request.head.increment-version-number }}
+          ref: ${{ github.event.pull_request.head.ref }}
           add: '["NEWS.rst", "newsfragments"]'
           author_name: am2558
           author_email: am2558@cornell.edu
