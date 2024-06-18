@@ -115,7 +115,7 @@ jobs:
 
       - name: Build release notes
         run: |
-          towncrier build --version ${{ steps.bump_version.outputs.new_version }} --yes
+          towncrier build --version ${{ steps.bump_version.outputs.new_version }} --keep
 
       - name: Debug - Print NEWS.rst
         run: cat NEWS.rst
