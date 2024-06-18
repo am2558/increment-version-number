@@ -45,7 +45,7 @@ jobs:
       - name: Build release notes
         run: |
           pwd
-          towncrier build --version ${{ github.event.inputs.version }} --yes
+          towncrier build --version ${{ github.event.inputs.version }} --keep
 
       - uses: EndBug/add-and-commit@v9
         with:
