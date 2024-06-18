@@ -109,7 +109,8 @@ jobs:
               "branch": "${{ github.event.inputs.branch }}",
               "version": "${{ steps.bump_version.outputs.new_version }}"
             }
-
+      - name: Debug - Print NEWS.rst
+        run: cat NEWS.rst
       - name: Create GitHub Tag
         id: tag_version
         run: |

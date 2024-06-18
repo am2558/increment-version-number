@@ -51,7 +51,7 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.increment-version-number }}
           ref: ${{ github.event.pull_request.head.ref }}
-          add: '["NEWS.rst", "newsfragments"]'
+          add: '["NEWS.rst", "src/newsfragments"]'
           author_name: am2558
           author_email: am2558@cornell.edu
           commit: --signoff
