@@ -75,7 +75,7 @@ jobs:
           pr_label = os.getenv('PR_LABEL')
           print(f'PR Label: {pr_label}')
           if pr_label:
-              if pr_label == 'Major Version':
+              if pr_label == 'Major Version': 
                   major = int(major) + 1
               elif pr_label == 'Minor Version':
                   minor = int(minor) + 1
@@ -117,11 +117,14 @@ jobs:
           echo "New version: ${{ env.NEW_VERSION }}"
           git tag v${{ env.NEW_VERSION }}
           git push origin v${{ env.NEW_VERSION }}
+      
+      - name: Debug - Print NEWS.rst
+        run: cat NEWS.rst
 
       - uses: EndBug/add-and-commit@v9
         with:
           ref: ${{ github.ref }}
-          add: '["code/django/version.txt", "NEWS.rst", "newsfragments"]' 
+          add: '["code/django/version.txt", "NEWS.rst", "src/newsfragments"]'
           author_name: am2558
           author_email: am2558@cornell.edu
           commit: --signoff
