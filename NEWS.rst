@@ -5,3 +5,12 @@ Bugfixes
 --------
 
 - new test note (#123)
+
+
+1.1.0 (2024-06-18)
+==================
+
+Bugfixes
+--------
+
+- new test note (#123)
