@@ -53,6 +53,14 @@ jobs:
           PR_LABEL=$(echo $PR_LABEL_JSON | jq -r '.[0].name')
           echo "PR_LABEL=$PR_LABEL" >> $GITHUB_ENV
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install towncrier requests
+
       - name: Increment version number based on branch name
         id: bump_version
         if: env.VALID_BRANCH_NAME == 'true'
@@ -98,17 +106,17 @@ jobs:
           with open(os.environ['GITHUB_ENV'], 'a') as env_file:
               env_file.write(f'NEW_VERSION={new_version}\n')"
 
-      - name: Trigger Release Notes Workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: Generate Release Notes
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.ref }}
-          inputs: |
-            {
-              "branch": "${{ github.event.inputs.branch }}",
-              "version": "${{ steps.bump_version.outputs.new_version }}"
-            }
+      - name: Generate news fragments
+        if: env.VALID_BRANCH_NAME == 'true'
+        run: python generate_news_fragments.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ steps.check_branch.outputs.branch_name }}
+
+      - name: Build release notes
+        run: |
+          towncrier build --version ${{ steps.bump_version.outputs.new_version }} --yes
+
       - name: Debug - Print NEWS.rst
         run: cat NEWS.rst
       - name: Create GitHub Tag
@@ -117,9 +125,7 @@ jobs:
           echo "New version: ${{ env.NEW_VERSION }}"
           git tag v${{ env.NEW_VERSION }}
           git push origin v${{ env.NEW_VERSION }}
-      
-      - name: Debug - Print NEWS.rst
-        run: cat NEWS.rst
+          cat NEWS.rst
 
       - uses: EndBug/add-and-commit@v9
         with:
