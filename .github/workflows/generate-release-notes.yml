@@ -46,6 +46,8 @@ jobs:
         run: |
           pwd
           towncrier build --version ${{ github.event.inputs.version }} --yes
+      - name: Debug - Print NEWS.rst
+        run: cat NEWS.rst
 
       - uses: EndBug/add-and-commit@v9
         with:
