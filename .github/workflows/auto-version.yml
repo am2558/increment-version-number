@@ -128,17 +128,17 @@ jobs:
           git push origin v${{ env.NEW_VERSION }}
 
       - name: Read Release Notes
-        id: release_notes
         run: |
-          RELEASE_NOTES=$(cat NEWS.rst)
-          echo "::set-output name=notes::$RELEASE_NOTES"
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          cat NEWS.rst >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ env.NEW_VERSION }}
           name: Release v${{ env.NEW_VERSION }}
-          body: ${{ steps.release_notes.outputs.notes }}
+          body: ${{ env.RELEASE_NOTES }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
