@@ -1,3 +1,18 @@
+2.1.17 (2024-06-25)
+===================
+
+Features
+--------
+
+- Descriptive blurb about feature added. (#234)
+
+
+Bugfixes
+--------
+
+- Hello world (#123)
+
+
 1.1.4 (2024-06-24)
 ==================
 
