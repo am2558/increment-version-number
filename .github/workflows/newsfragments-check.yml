@@ -1,0 +1,20 @@
+name: CI Check for News Fragments
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  ci_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Ensure newsfragments is non-empty
+        run: |
+          if [ $(find newsfragments -type f ! -name ".gitignore" | wc -l) -eq 0 ]; then
+            echo "newsfragments is empty! Please add a news fragment."
+            exit 1
+          fi
