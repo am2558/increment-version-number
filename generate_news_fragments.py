@@ -41,7 +41,3 @@ def determine_fragment_type(body):
         return "bugfix"
     else:
         return "misc"
-
-# if __name__ == "__main__":
-#     prs = get_prs()
-#     create_news_fragments(prs)
