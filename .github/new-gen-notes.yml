@@ -26,18 +26,6 @@ jobs:
       - name: Install dependencies
         run: pip install towncrier requests
 
-      - name: Debug
-        run: |
-          ls -R
-          pwd
-
-      - name: Ensure newsfragments is non-empty
-        run: |
-          if [ $(find newsfragments -type f ! -name ".gitignore" | wc -l) -eq 0 ]; then
-            echo "newsfragments is empty! Please add a news fragment."
-            exit 1
-          fi
-
       - name: Read version number
         id: read_version
         run: |
