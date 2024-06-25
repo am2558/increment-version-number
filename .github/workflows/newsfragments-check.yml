@@ -1,4 +1,4 @@
-name: CI Check for News Fragments
+name: CI Check for Newsfragments
 
 on:
   pull_request:
