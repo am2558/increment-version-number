@@ -40,7 +40,7 @@ jobs:
 
       - name: Build release notes
         run: |
-          towncrier build --version ${{ env.VERSION }} --keep
+          towncrier build --version ${{ env.VERSION }} --yes
 
       - name: Commit and Push Release Notes
         uses: EndBug/add-and-commit@v9
