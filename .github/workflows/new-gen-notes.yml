@@ -41,6 +41,11 @@ jobs:
       - name: Build release notes
         run: |
           towncrier build --version ${{ env.VERSION }} --yes
+      - name: Read Release Notes
+        id: release_notes
+        run: |
+          RELEASE_NOTES=$(cat NEWS.rst)
+          echo "::set-output name=notes::$RELEASE_NOTES"
 
       - name: Commit and Push Release Notes
         uses: EndBug/add-and-commit@v9
