@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main branch
+      - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          ref: main
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -41,17 +41,10 @@ jobs:
       - name: Build release notes
         run: |
           towncrier build --version ${{ env.VERSION }} --yes
-
-      - name: Read Release Notes
-        id: release_notes
-        run: |
-          RELEASE_NOTES=$(cat NEWS.rst)
-          echo "::set-output name=notes::$RELEASE_NOTES"
-
       - name: Commit and Push Release Notes
         uses: EndBug/add-and-commit@v9
         with:
-          ref: main
+          ref: ${{ github.event.pull_request.head.ref }}
           add: '["NEWS.rst", "newsfragments"]'
           author_name: 'Github Actions - Release Notes Workflow'
           author_email: actions@github.com
