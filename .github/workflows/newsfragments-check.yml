@@ -14,6 +14,17 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: Validate branch name
+        id: validate_branch_name
+        run: |
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          if [[ ! "$BRANCH_NAME" =~ (AQC|TQA|BUGFIX|QNO)-[0-9]+-.* ]]; then
+            echo "Branch name '$BRANCH_NAME' is invalid. It should match the pattern: (AQC|TQA|BUGFIX|QNO)-###-<description>"
+            exit 1
+          else
+            echo "Branch name '$BRANCH_NAME' is valid."
+          fi
+
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v44
@@ -27,4 +38,23 @@ jobs:
           else
             echo "Found the following newsfragments changes:"
             echo "$CHANGED_FILES"
+          fi
+
+      - name: Validate newsfragment file names
+        run: |
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          PREFIX=$(echo "$BRANCH_NAME" | sed -E 's/((AQC|TQA|BUGFIX|QNO)-[0-9]+)')
+          INVALID_FILES=""
+          for file in $(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | grep '^newsfragments/'); do
+            BASENAME=$(basename "$file")
+            if [[ ! "$BASENAME" =~ ^$PREFIX- ]]; then
+              INVALID_FILES="$INVALID_FILES\n$file"
+            fi
+          done
+
+          if [ -n "$INVALID_FILES" ]; then
+            echo -e "The following newsfragment files have invalid names:$INVALID_FILES"
+            exit 1
+          else
+            echo "All newsfragment files have valid names."
           fi
