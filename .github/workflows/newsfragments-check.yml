@@ -1,4 +1,4 @@
-name: CI Check for Newsfragments
+name: This is the correct check!
 
 on:
   pull_request:
