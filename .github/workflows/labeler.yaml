@@ -1,39 +1,47 @@
-name: Automatic PR Labeler
+name: CI Check for Newsfragments
+
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  label-pr:
-    runs-on: ubuntu-latest 
+  newsfragment_check:
+    runs-on: ubuntu-latest
+    name: Check for newsfragments
     steps:
-      - name: Extract branch type from PR title
-        id: branch-type
+      - name: Checkout PR
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+
+      - name: Ensure newsfragments is non-empty
         run: |
-          BRANCH_NAME="${{ github.head_ref }}"
-          echo "Branch name: $BRANCH_NAME"
-          if [[ "$BRANCH_NAME" =~ BUGFIX-AQC-[0-9]+-.+ ]]; then
-            echo "::set-output name=LABEL::Bugfix Version"
-          elif [[ "$BRANCH_NAME" =~ FEATURE-AQC-[0-9]+-.+ ]]; then
-            echo "::set-output name=LABEL::Minor Version"
-          elif [[ "$BRANCH_NAME" =~ TQA-[0-9]+-.+ ]]; then
-            echo "::set-output name=LABEL::Bugfix Version"
+          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | grep '^newsfragments/')
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No newsfragments files were changed! Please add a news fragment."
+            exit 1
           else
-            echo "No specific branch pattern matched."
-            echo "::set-output name=LABEL::"
+            echo "Found the following newsfragments changes:"
+            echo "$CHANGED_FILES"
           fi
 
-      - name: Apply label to PR
-        if: steps.branch-type.outputs.LABEL != ''
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const label = "${{ steps.branch-type.outputs.LABEL }}";
-            const issue_number = context.issue.number;
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              labels: [label]
-            });
+      - name: Validate newsfragment file names
+        run: |
+          INVALID_FILES=""
+          for file in $(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | grep '^newsfragments/'); do
+            BASENAME=$(basename "$file")
+            if [[ ! "$BASENAME" =~ (AQC|TQA|BUGFIX|QNO)-[0-9]+-.* ]]; then
+              INVALID_FILES="$INVALID_FILES\n$file"
+            fi
+          done
+
+          if [ -n "$INVALID_FILES" ]; then
+            echo -e "The following newsfragment files have invalid names:$INVALID_FILES"
+            exit 1
+          else
+            echo "All newsfragment files have valid names."
+          fi
