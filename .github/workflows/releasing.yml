@@ -19,58 +19,62 @@ jobs:
       - name: Install dependencies
         run: pip install towncrier requests
 
-### change this -- increment version number based on release notes. ex. 4 instances of "bugfi"x means you bump patch, 4 instances of "feature" means you bump minor number.
-      - name: Increment version number based on branch name
+      - name: Increment version number based on newsfragments
         id: bump_version
-        if: env.VALID_BRANCH_NAME == 'true'
         run: |
-          python -c "
           import os
           import re
-          version_file='code/django/version.txt'
-          print(f'::debug::{os.getcwd()}')
-          
+
+          # Read the current version
+          version_file = 'code/django/version.txt'
           with open(version_file, 'r') as file:
-              version_lines = file.readlines()
-          version = version_lines[0].strip()
-          print(f'::debug::{version} version file before incrementing')
+              version = file.read().strip()
+
           match = re.match(r'(\d+)\.(\d+)\.(\d+)(-.+)?', version)
-          if not match: 
-              raise ValueError(match)
-          
-          major, minor, patch, suffix = match.groups() 
-          pr_label = os.getenv('PR_LABEL')
-          print(f'PR Label: {pr_label}')
-          if pr_label:
-              if pr_label == 'Major Version': 
-                  major = int(major) + 1
-              elif pr_label == 'Minor Version':
-                  minor = int(minor) + 1
-              elif pr_label == 'Bugfix Version':
-                  patch = int(patch) + 1
-          else:
-              if '${{ env.GH_ISSUE_TYPE }}' == 'FEATURE':
-                  minor = int(minor) + 1
-              elif '${{ env.GH_ISSUE_TYPE }}' == 'BUGFIX':
-                  patch = int(patch) + 1
-          
-          new_version = f'{major}.{minor}.{patch}'
+          if not match:
+              raise ValueError("Invalid version format")
+
+          major, minor, patch, suffix = match.groups()
+          major = int(major)
+          minor = int(minor)
+          patch = int(patch)
+
+          # Count the number of newsfragment files
+          bugfix_count = 0
+          feature_count = 0
+          for root, dirs, files in os.walk("newsfragments"):
+              for file in files:
+                  if file.endswith(".bugfix"):
+                      bugfix_count += 1
+                  elif file.endswith(".feature"):
+                      feature_count += 1
+
+          # Determine the version increment
+          if feature_count > 0:
+              minor += 1
+              patch = 0
+          elif bugfix_count > 0:
+              patch += 1
+
+          new_version = f"{major}.{minor}.{patch}"
           if suffix:
               new_version += suffix
+
+          # Write the new version back to the file
           with open(version_file, 'w') as file:
               file.write(new_version)
-          print(f'::debug::New version: {new_version}')
-          print(f'::set-output name=new_version::{new_version}')
-          os.environ['NEW_VERSION'] = new_version
-          with open(os.environ['GITHUB_ENV'], 'a') as env_file:
-              env_file.write(f'NEW_VERSION={new_version}\n')"
+
+          print(f"::set-output name=new_version::{new_version}")
+          os.environ["NEW_VERSION"] = new_version
+          with open(os.environ["GITHUB_ENV"], "a") as env_file:
+              env_file.write(f"NEW_VERSION={new_version}\n")
 
       - name: Create GitHub Tag
         id: tag_version
         run: |
-          echo "New version: ${{ env.NEW_VERSION }}"
-          git tag v${{ env.NEW_VERSION }}
-          git push origin v${{ env.NEW_VERSION }}
+          echo "New version: ${{ steps.bump_version.outputs.new_version }}"
+          git tag v${{ steps.bump_version.outputs.new_version }}
+          git push origin v${{ steps.bump_version.outputs.new_version }}
 
       - name: Read Release Notes
         id: release_notes
@@ -81,8 +85,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.NEW_VERSION }}
-          name: Release v${{ env.NEW_VERSION }}
+          tag_name: v${{ steps.bump_version.outputs.new_version }}
+          name: Release v${{ steps.bump_version.outputs.new_version }}
           body: ${{ steps.release_notes.outputs.notes }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
