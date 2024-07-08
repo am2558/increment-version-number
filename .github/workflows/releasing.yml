@@ -105,7 +105,7 @@ jobs:
 
       - name: Clear newsfragments and NEWS.rst
         run: |
-          rm -rf newsfragments/*
+          rm -rf newsfragments/!(.gitignore)
           echo '' > NEWS.rst
 
       - name: Commit and Push Clear newsfragments and NEWS.rst
