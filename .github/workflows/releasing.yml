@@ -25,7 +25,6 @@ jobs:
           import os
           import re
 
-          # Read the current version
           version_file = 'code/django/version.txt'
           with open(version_file, 'r') as file:
               version = file.read().strip()
@@ -39,7 +38,6 @@ jobs:
           minor = int(minor)
           patch = int(patch)
 
-          # Count the number of newsfragment files
           bugfix_count = 0
           feature_count = 0
           for root, dirs, files in os.walk("newsfragments"):
@@ -49,7 +47,6 @@ jobs:
                   elif file.endswith(".feature"):
                       feature_count += 1
 
-          # Determine the version increment
           if feature_count > 0:
               minor += 1
               patch = 0
@@ -59,8 +56,7 @@ jobs:
           new_version = f"{major}.{minor}.{patch}"
           if suffix:
               new_version += suffix
-
-          # Write the new version back to the file
+              
           with open(version_file, 'w') as file:
               file.write(new_version)
 
@@ -104,5 +100,27 @@ jobs:
           default_author: github_actor
           fetch: true
           message: "increment version number"
+          pathspec_error_handling: exitImmediately
+          push: true
+
+      - name: Clear newsfragments and NEWS.rst
+        run: |
+          rm -rf newsfragments/*
+          echo '' > NEWS.rst
+
+      - name: Commit and Push Clear newsfragments and NEWS.rst
+        uses: EndBug/add-and-commit@v9
+        with:
+          ref: ${{ github.ref }}
+          add: newsfragments NEWS.rst
+          author_name: 'Github Actions - Releasing Workflow'
+          author_email: actions@github.com
+          commit: --signoff
+          committer_name: 'Github Actions - Releasing Workflow'
+          committer_email: actions@github.com
+          cwd: "."
+          default_author: github_actor
+          fetch: true
+          message: "Clear newsfragments and NEWS.rst"
           pathspec_error_handling: exitImmediately
           push: true
