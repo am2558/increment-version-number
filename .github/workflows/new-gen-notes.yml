@@ -1,59 +1,59 @@
-name: PR Merge Release Notes
+# name: PR Merge Release Notes
 
-on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
+# on:
+#   pull_request:
+#     types: [closed]
+#     branches:
+#       - main
 
-jobs:
-  release_notes:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
+# jobs:
+#   release_notes:
+#     if: github.event.pull_request.merged == true
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v2
+#         with:
+#           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-          cache: 'pip'
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.x'
+#           cache: 'pip'
 
-      - name: Install dependencies
-        run: pip install towncrier requests
+#       - name: Install dependencies
+#         run: pip install towncrier requests
 
-      - name: Read version number
-        id: read_version
-        run: |
-          VERSION=$(cat code/django/version.txt)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+#       - name: Read version number
+#         id: read_version
+#         run: |
+#           VERSION=$(cat code/django/version.txt)
+#           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Generate news fragments
-        run: python generate_news_fragments.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+#       - name: Generate news fragments
+#         run: python generate_news_fragments.py
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
 
-      - name: Build release notes
-        run: |
-          towncrier build --version ${{ env.VERSION }} --yes
-      - name: Commit and Push Release Notes
-        uses: EndBug/add-and-commit@v9
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          add: '["NEWS.rst", "newsfragments"]'
-          author_name: 'Github Actions - Release Notes Workflow'
-          author_email: actions@github.com
-          commit: --signoff
-          committer_name: 'Github Actions - Release Notes Workflow'
-          committer_email: actions@github.com
-          cwd: "."
-          default_author: github_actor
-          fetch: true
-          message: "Generate release notes and commit changes"
-          pathspec_error_handling: exitImmediately
-          push: true
+#       - name: Build release notes
+#         run: |
+#           towncrier build --version ${{ env.VERSION }} --yes
+#       - name: Commit and Push Release Notes
+#         uses: EndBug/add-and-commit@v9
+#         with:
+#           ref: ${{ github.event.pull_request.head.ref }}
+#           add: '["NEWS.rst", "newsfragments"]'
+#           author_name: 'Github Actions - Release Notes Workflow'
+#           author_email: actions@github.com
+#           commit: --signoff
+#           committer_name: 'Github Actions - Release Notes Workflow'
+#           committer_email: actions@github.com
+#           cwd: "."
+#           default_author: github_actor
+#           fetch: true
+#           message: "Generate release notes and commit changes"
+#           pathspec_error_handling: exitImmediately
+#           push: true
