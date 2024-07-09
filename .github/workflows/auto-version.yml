@@ -1,166 +1,166 @@
-name: Auto-version
-on:
-  workflow_dispatch:
+# name: Auto-version
+# on:
+#   workflow_dispatch:
 
-jobs:
-  close:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    outputs:
-      closed: ${{ steps.close.outputs.closed }}
-      issue: ${{ steps.issue.outputs.issue }}
-    steps:
-      - uses: actions/checkout@v4
+# jobs:
+#   close:
+#     if: github.event_name == 'workflow_dispatch'
+#     runs-on: ubuntu-latest
+#     outputs:
+#       closed: ${{ steps.close.outputs.closed }}
+#       issue: ${{ steps.issue.outputs.issue }}
+#     steps:
+#       - uses: actions/checkout@v4
       
-      - name: Check if valid feature or bugfix branch
-        id: check_branch
-        run: |
-          echo "Current ref: ${{ github.ref }}"
-          branch_name="${{ github.ref }}"
-          branch_name=${branch_name#refs/heads/}
-          echo "Current branch name: $branch_name"
-          if [[ "$branch_name" =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]] || [[ "$branch_name" =~ (TQA|QNO)-[0-9]+-.+ ]]; then
-            echo "VALID_BRANCH_NAME=true" >> $GITHUB_ENV
-            if [[ "$branch_name" =~ FEATURE.* ]]; then
-              echo "GH_ISSUE_TYPE=FEATURE" >> $GITHUB_ENV
-            elif [[ "$branch_name" =~ BUGFIX.* ]]; then
-              echo "GH_ISSUE_TYPE=BUGFIX" >> $GITHUB_ENV
-            elif [[ "$branch_name" =~ TQA.* ]]; then
-              echo "GH_ISSUE_TYPE=BUGFIX" >> $GITHUB_ENV
-            fi
-          else
-            echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
-          fi
+#       - name: Check if valid feature or bugfix branch
+#         id: check_branch
+#         run: |
+#           echo "Current ref: ${{ github.ref }}"
+#           branch_name="${{ github.ref }}"
+#           branch_name=${branch_name#refs/heads/}
+#           echo "Current branch name: $branch_name"
+#           if [[ "$branch_name" =~ (FEATURE|BUGFIX)-AQC-[0-9]+-.+ ]] || [[ "$branch_name" =~ (TQA|QNO)-[0-9]+-.+ ]]; then
+#             echo "VALID_BRANCH_NAME=true" >> $GITHUB_ENV
+#             if [[ "$branch_name" =~ FEATURE.* ]]; then
+#               echo "GH_ISSUE_TYPE=FEATURE" >> $GITHUB_ENV
+#             elif [[ "$branch_name" =~ BUGFIX.* ]]; then
+#               echo "GH_ISSUE_TYPE=BUGFIX" >> $GITHUB_ENV
+#             elif [[ "$branch_name" =~ TQA.* ]]; then
+#               echo "GH_ISSUE_TYPE=BUGFIX" >> $GITHUB_ENV
+#             fi
+#           else
+#             echo "VALID_BRANCH_NAME=false" >> $GITHUB_ENV
+#           fi
 
-      - name: Fetch pull request details
-        id: pr_details
-        uses: octokit/request-action@v2.x
-        if: env.VALID_BRANCH_NAME == 'true'
-        with:
-          route: GET /repos/${{ github.repository }}/pulls
-          parameters: |
-            {
-              "head": "${{ github.repository }}:${branch_name}",
-              "state": "open"
-            }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-      - name: Call labeler
-        uses: ./.github/workflows/labeler.yaml@main
+#       - name: Fetch pull request details
+#         id: pr_details
+#         uses: octokit/request-action@v2.x
+#         if: env.VALID_BRANCH_NAME == 'true'
+#         with:
+#           route: GET /repos/${{ github.repository }}/pulls
+#           parameters: |
+#             {
+#               "head": "${{ github.repository }}:${branch_name}",
+#               "state": "open"
+#             }
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+#       - name: Call labeler
+#         uses: ./.github/workflows/labeler.yaml@main
 
-      - name: Extract PR labels
-        id: extract_labels
-        run: |
-          PR_LABEL_JSON=$(echo '${{ steps.pr_details.outputs.data }}' | jq '.[0].labels')
-          PR_LABEL=$(echo $PR_LABEL_JSON | jq -r '.[0].name')
-          echo "PR_LABEL=$PR_LABEL" >> $GITHUB_ENV
+#       - name: Extract PR labels
+#         id: extract_labels
+#         run: |
+#           PR_LABEL_JSON=$(echo '${{ steps.pr_details.outputs.data }}' | jq '.[0].labels')
+#           PR_LABEL=$(echo $PR_LABEL_JSON | jq -r '.[0].name')
+#           echo "PR_LABEL=$PR_LABEL" >> $GITHUB_ENV
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install towncrier requests
+#       - name: Install dependencies
+#         run: pip install towncrier requests
 
-      - name: Increment version number based on branch name
-        id: bump_version
-        if: env.VALID_BRANCH_NAME == 'true'
-        run: |
-          python -c "
-          import os
-          import re
-          version_file='code/django/version.txt'
-          print(f'::debug::{os.getcwd()}')
+#       - name: Increment version number based on branch name
+#         id: bump_version
+#         if: env.VALID_BRANCH_NAME == 'true'
+#         run: |
+#           python -c "
+#           import os
+#           import re
+#           version_file='code/django/version.txt'
+#           print(f'::debug::{os.getcwd()}')
           
-          with open(version_file, 'r') as file:
-              version_lines = file.readlines()
-          version = version_lines[0].strip()
-          print(f'::debug::{version} version file before incrementing')
-          match = re.match(r'(\d+)\.(\d+)\.(\d+)(-.+)?', version)
-          if not match: 
-              raise ValueError(match)
+#           with open(version_file, 'r') as file:
+#               version_lines = file.readlines()
+#           version = version_lines[0].strip()
+#           print(f'::debug::{version} version file before incrementing')
+#           match = re.match(r'(\d+)\.(\d+)\.(\d+)(-.+)?', version)
+#           if not match: 
+#               raise ValueError(match)
           
-          major, minor, patch, suffix = match.groups() 
-          pr_label = os.getenv('PR_LABEL')
-          print(f'PR Label: {pr_label}')
-          if pr_label:
-              if pr_label == 'Major Version': 
-                  major = int(major) + 1
-              elif pr_label == 'Minor Version':
-                  minor = int(minor) + 1
-              elif pr_label == 'Bugfix Version':
-                  patch = int(patch) + 1
-          else:
-              if '${{ env.GH_ISSUE_TYPE }}' == 'FEATURE':
-                  minor = int(minor) + 1
-              elif '${{ env.GH_ISSUE_TYPE }}' == 'BUGFIX':
-                  patch = int(patch) + 1
+#           major, minor, patch, suffix = match.groups() 
+#           pr_label = os.getenv('PR_LABEL')
+#           print(f'PR Label: {pr_label}')
+#           if pr_label:
+#               if pr_label == 'Major Version': 
+#                   major = int(major) + 1
+#               elif pr_label == 'Minor Version':
+#                   minor = int(minor) + 1
+#               elif pr_label == 'Bugfix Version':
+#                   patch = int(patch) + 1
+#           else:
+#               if '${{ env.GH_ISSUE_TYPE }}' == 'FEATURE':
+#                   minor = int(minor) + 1
+#               elif '${{ env.GH_ISSUE_TYPE }}' == 'BUGFIX':
+#                   patch = int(patch) + 1
           
-          new_version = f'{major}.{minor}.{patch}'
-          if suffix:
-              new_version += suffix
-          with open(version_file, 'w') as file:
-              file.write(new_version)
-          print(f'::debug::New version: {new_version}')
-          print(f'::set-output name=new_version::{new_version}')
-          os.environ['NEW_VERSION'] = new_version
-          with open(os.environ['GITHUB_ENV'], 'a') as env_file:
-              env_file.write(f'NEW_VERSION={new_version}\n')"
-      - name: Build release notes
-        run: |
-          towncrier build --version ${{ steps.bump_version.outputs.new_version }} --keep
+#           new_version = f'{major}.{minor}.{patch}'
+#           if suffix:
+#               new_version += suffix
+#           with open(version_file, 'w') as file:
+#               file.write(new_version)
+#           print(f'::debug::New version: {new_version}')
+#           print(f'::set-output name=new_version::{new_version}')
+#           os.environ['NEW_VERSION'] = new_version
+#           with open(os.environ['GITHUB_ENV'], 'a') as env_file:
+#               env_file.write(f'NEW_VERSION={new_version}\n')"
+#       - name: Build release notes
+#         run: |
+#           towncrier build --version ${{ steps.bump_version.outputs.new_version }} --keep
 
-      - name: Create GitHub Tag
-        id: tag_version
-        run: |
-          echo "New version: ${{ env.NEW_VERSION }}"
-          git tag v${{ env.NEW_VERSION }}
-          git push origin v${{ env.NEW_VERSION }}
+#       - name: Create GitHub Tag
+#         id: tag_version
+#         run: |
+#           echo "New version: ${{ env.NEW_VERSION }}"
+#           git tag v${{ env.NEW_VERSION }}
+#           git push origin v${{ env.NEW_VERSION }}
 
-      - name: Read Release Notes
-        id: release_notes
-        run: |
-          RELEASE_NOTES=$(cat NEWS.rst)
-          echo "::set-output name=notes::$RELEASE_NOTES"
+#       - name: Read Release Notes
+#         id: release_notes
+#         run: |
+#           RELEASE_NOTES=$(cat NEWS.rst)
+#           echo "::set-output name=notes::$RELEASE_NOTES"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ env.NEW_VERSION }}
-          name: Release v${{ env.NEW_VERSION }}
-          body: ${{ steps.release_notes.outputs.notes }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Create GitHub Release
+#         uses: softprops/action-gh-release@v1
+#         with:
+#           tag_name: v${{ env.NEW_VERSION }}
+#           name: Release v${{ env.NEW_VERSION }}
+#           body: ${{ steps.release_notes.outputs.notes }}
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: EndBug/add-and-commit@v9
-        with:
-          ref: ${{ github.ref }}
-          add: '["code/django/version.txt", "NEWS.rst", "newsfragments"]'
-          author_name: 'Github Actions - Auto-version / Releasing Workflow'
-          author_email: actions@github.com
-          commit: --signoff
-          committer_name: 'Github Actions - Auto-version / Releasing Workflow'
-          committer_email: actions@github.com
-          cwd: "."
-          default_author: github_actor
-          fetch: true
-          message: "increment version number"
-          pathspec_error_handling: exitImmediately
-          push: true
+#       - uses: EndBug/add-and-commit@v9
+#         with:
+#           ref: ${{ github.ref }}
+#           add: '["code/django/version.txt", "NEWS.rst", "newsfragments"]'
+#           author_name: 'Github Actions - Auto-version / Releasing Workflow'
+#           author_email: actions@github.com
+#           commit: --signoff
+#           committer_name: 'Github Actions - Auto-version / Releasing Workflow'
+#           committer_email: actions@github.com
+#           cwd: "."
+#           default_author: github_actor
+#           fetch: true
+#           message: "increment version number"
+#           pathspec_error_handling: exitImmediately
+#           push: true
 
-      - name: Login to Quay.io 
-        uses: docker/login-action@v2
-        with:
-          registry: quay.io
-          username: ${{ vars.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+#       - name: Login to Quay.io 
+#         uses: docker/login-action@v2
+#         with:
+#           registry: quay.io
+#           username: ${{ vars.QUAY_USERNAME }}
+#           password: ${{ secrets.QUAY_ROBOT_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: |
-              quay.io/am2558/aliro-orchestrator-fake:${{ env.NEW_VERSION }}
-              quay.io/am2558/aliro-orchestrator-fake:latest
+#       - name: Build and push Docker image
+#         uses: docker/build-push-action@v4
+#         with:
+#           context: .
+#           push: true
+#           tags: |
+#               quay.io/am2558/aliro-orchestrator-fake:${{ env.NEW_VERSION }}
+#               quay.io/am2558/aliro-orchestrator-fake:latest
