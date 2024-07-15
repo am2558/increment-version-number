@@ -1,0 +1,45 @@
+name: Release Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACTIONS_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install towncrier requests
+
+      - name: Increment version number based on newsfragments
+        id: bump_version
+        run: python version-bump.py
+
+      - name: Commit and push changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          ref: ${{ github.ref }}
+          add: "code/django/version.txt"
+          author_name: 'Github Actions - Auto-version / Releasing Workflow'
+          author_email: actions@github.com
+          commit: --signoff
+          committer_name: 'Github Actions - Auto-version / Releasing Workflow'
+          committer_email: actions@github.com
+          cwd: "."
+          default_author: github_actor
+          fetch: true
+          message: "increment version number"
+          pathspec_error_handling: exitImmediately
+          push: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}

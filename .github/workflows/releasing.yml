@@ -19,6 +19,7 @@ jobs:
       - name: Install dependencies
         run: pip install towncrier requests
 
+      ## Optional step?
       - name: Increment version number based on newsfragments
         id: bump_version
         run: |

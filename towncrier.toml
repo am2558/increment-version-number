@@ -1,4 +1,3 @@
 [tool.towncrier]
 directory = "newsfragments"
-
 filename = "NEWS.rst"
