@@ -10,8 +10,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.ACTIONS_PAT }}
+        # with:
+        #   token: ${{ secrets.ACTIONS_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,7 +23,7 @@ jobs:
 
       - name: Increment version number based on newsfragments
         id: bump_version
-        run: python version-bump.py
+        run: "python version-bump.py"
 
       - name: Commit and push changes
         uses: EndBug/add-and-commit@v9
