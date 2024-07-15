@@ -23,7 +23,7 @@ jobs:
 
       - name: Increment version number based on newsfragments
         id: bump_version
-        run: "python version-bump.py"
+        run: "python .github/workkflows/version-bump.py"
 
       - name: Commit and push changes
         uses: EndBug/add-and-commit@v9
