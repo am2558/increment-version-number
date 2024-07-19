@@ -2,7 +2,7 @@ name: Create GitHub Release
 
 on:
   workflow_dispatch:
-  
+
 jobs:
   create_release:
     runs-on: ubuntu-latest
@@ -19,7 +19,7 @@ jobs:
       - name: Read version from VERSION.txt
         id: read_version
         run: |
-          VERSION=$(cat VERSION.txt)
+          VERSION=$(cat code/django/VERSION.txt)
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Read entire NEWS.rst
