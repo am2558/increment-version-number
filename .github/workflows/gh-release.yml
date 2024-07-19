@@ -19,7 +19,7 @@ jobs:
       - name: Read version from VERSION.txt
         id: read_version
         run: |
-          VERSION=$(cat code/django/VERSION.txt)
+          VERSION=$(cat "code/django/VERSION.txt")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Read entire NEWS.rst
