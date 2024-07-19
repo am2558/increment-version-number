@@ -1,0 +1,49 @@
+name: Create GitHub Release
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Read version from VERSION.txt
+        id: read_version
+        run: |
+          VERSION=$(cat VERSION.txt)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Read entire NEWS.rst
+        id: read_release_notes
+        run: |
+          RELEASE_NOTES=$(cat NEWS.rst)
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: ${{ env.VERSION }}
+          body: ${{ env.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+
+      - name: Upload release notes
+        uses: actions/upload-artifact@v2
+        with:
+          name: Release Notes
+          path: NEWS.rst
