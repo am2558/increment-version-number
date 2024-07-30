@@ -1,88 +1,73 @@
-name: Tag Quay Release as Release Candidate
-
+name: Updated Quay
 on:
   workflow_dispatch:
 
-env:
-  IMAGES_SERVER: server
-  IMAGES_SERVER_EPB: server-epb
-  IMAGES_APP: app
-  IMAGES_DD_SERVICE: dd-service
-  IMAGES_YUMA_BASE: yuma-base
-
 jobs:
-  tag-as-rc:
+  close:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-
+    outputs:
+      closed: ${{ steps.close.outputs.closed }}
+      issue: ${{ steps.issue.outputs.issue }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Create GitHub Tag
+        id: tag_version
+        run: |
+          echo "New version: ${{ env.NEW_VERSION }}"
+          git tag v${{ env.NEW_VERSION }}
+          git push origin v${{ env.NEW_VERSION }}
 
-      - name: Login to Quay.io
+      - name: Read Release Notes
+        id: release_notes
+        run: |
+          RELEASE_NOTES=$(cat NEWS.rst)
+          echo "::set-output name=notes::$RELEASE_NOTES"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.NEW_VERSION }}
+          name: Release v${{ env.NEW_VERSION }}
+          body: ${{ steps.release_notes.outputs.notes }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: EndBug/add-and-commit@v9
+        with:
+          ref: ${{ github.ref }}
+          add: '["code/django/version.txt", "NEWS.rst", "newsfragments"]'
+          author_name: 'Github Actions - Auto-version / Releasing Workflow'
+          author_email: actions@github.com
+          commit: --signoff
+          committer_name: 'Github Actions - Auto-version / Releasing Workflow'
+          committer_email: actions@github.com
+          cwd: "."
+          default_author: github_actor
+          fetch: true
+          message: "increment version number"
+          pathspec_error_handling: exitImmediately
+          push: true
+
+      - name: Login to Quay.io 
         uses: docker/login-action@v2
         with:
           registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
+          username: ${{ vars.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_ROBOT_TOKEN }}
 
-      - name: Read version for tags
-        id: tags
-        run: |
-          VERSION=$(cat code/django/version.txt)
-          echo "VERSION=${VERSION}-rc" >> $GITHUB_ENV
-
-      - name: Set Service -> Tag Map
-        id: set_tag_map
-        run: |
-          key_images="images"
-          key_tags="tags"
-          service_to_tags=$(echo '{
-            "${{ env.IMAGES_SERVER }}": {
-              "'"$key_images"'": ["quay.io/aliro-technologies/aliro-orchestrator"],
-              "'"$key_tags"'": ["${{ env.VERSION }}"]
-            },
-            "${{ env.IMAGES_SERVER_EPB }}": {
-              "'"$key_images"'": ["quay.io/aliro-technologies/aliro-orchestrator-epb"],
-              "'"$key_tags"'": ["${{ env.VERSION }}"]
-            },
-            "${{ env.IMAGES_APP }}": {
-              "'"$key_images"'": ["quay.io/aliro-technologies/aliro-orchestrator-app", "quay.io/aliro-technologies/aliro-orchestrator-app-epb"],
-              "'"$key_tags"'": ["${{ env.VERSION }}"]
-            },
-            "${{ env.IMAGES_DD_SERVICE }}": {
-              "'"$key_images"'": ["quay.io/aliro-technologies/aliro-orchestrator-dd-service"],
-              "'"$key_tags"'": ["${{ env.VERSION }}"]
-            },
-            "${{ env.IMAGES_YUMA_BASE }}": {
-              "'"$key_images"'": ["quay.io/aliro-technologies/yuma-base"],
-              "'"$key_tags"'": ["${{ env.VERSION }}"]
-            }
-          }' | jq -r 'tostring')
-          echo "service_to_tags=${service_to_tags}" >> $GITHUB_ENV
-
-      - name: Tag Quay Images as Release Candidate
-        run: |
-          service_to_tags=${{ env.service_to_tags }}
-          for entry in $(echo "${service_to_tags}" | jq -r 'to_entries[] | tostring'); do
-            key=$(echo $entry | jq '.key')
-            images=$(echo $entry | jq -r '.value.images | tostring')
-            tags=$(echo $entry | jq -r '.value.tags | tostring')
-
-            for image in $(echo "${images}" | jq -r '.[]'); do
-              for tag in $(echo "${tags}" | jq -r '.[]'); do
-                rc_tag="${image}:${tag}"
-                latest_tag="${image}:latest"
-                docker tag "${latest_tag}" "${rc_tag}"
-                docker push "${rc_tag}"
-              done
-            done
-          done
-
-      - name: push README to Quay.io
-        uses: christian-korneck/update-container-description-action@v1
-        env:
-          DOCKER_APIKEY: ${{ secrets.APIKEY__QUAY_IO }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
         with:
-          destination_container_repo: quay.io/aliro-technologies/aliro-orchestrator
-          provider: quay
-          readme_file: 'README-ext.md'
+          context: .
+          push: true
+          tags: |
+              quay.io/am2558/aliro-orchestrator-fake:${{ env.NEW_VERSION }}
+              quay.io/am2558/aliro-orchestrator-fake:latest
+
+      #tag the release as a release candidate
+      - name: Tag as release candidate
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: quay.io/am2558/aliro-orchestrator-fake:${{ env.NEW_VERSION }}-rc
