@@ -1,0 +1,61 @@
+
+name: Release Workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACTIONS_PAT }}
+
+# Generating Release Notes in NEWS.rst
+  release_notes:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Read version from VERSION.txt
+        id: read_version
+        run: |
+          VERSION=$(cat "code/django/VERSION.txt")
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          done
+
+ #Create GitHub Release
+  github_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read NEWS.rst
+        id: read_release_notes
+        run: |
+          RELEASE_NOTES=$(cat NEWS.rst)
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: ${{ env.VERSION }}
+          body: ${{ env.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
