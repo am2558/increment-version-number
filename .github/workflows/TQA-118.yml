@@ -34,7 +34,6 @@ jobs:
         run: |
           VERSION=$(cat "code/django/VERSION.txt")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          done
 
  #Create GitHub Release
   github_release:
