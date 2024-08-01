@@ -39,6 +39,8 @@ jobs:
   github_release:
     runs-on: ubuntu-latest
     steps:
+      - name: See current working directory
+        run: pwd
       - name: Read NEWS.rst
         id: read_release_notes
         run: |
