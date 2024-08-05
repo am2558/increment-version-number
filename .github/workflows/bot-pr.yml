@@ -1,0 +1,35 @@
+name: Create Bot PR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-bot-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create a new branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b bot-test-branch
+
+      - name: Make a change
+        run: |
+          echo "This is a test file for bot PR" > bot-test-file.txt
+          git add bot-test-file.txt
+          git commit -m "Add test file for bot PR"
+
+      - name: Push the new branch
+        run: git push origin bot-test-branch
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: bot-test-branch
+          title: "Bot Test PR"
+          body: "This is a pull request created by GitHub Actions for testing purposes."
+          base: main
