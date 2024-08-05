@@ -14,16 +14,13 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Validate branch name
-        id: validate_branch_name
-        run: |
-          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
-          if [[ ! "$BRANCH_NAME" =~ ^(AQC|TQA|BUGFIX|QNO)-[0-9]+-.*$ ]]; then
-            echo "Branch name '$BRANCH_NAME' is invalid. It should match the pattern: (AQC|TQA|BUGFIX|QNO)-###-<description>"
-            exit 1
-          else
-            echo "Branch name '$BRANCH_NAME' is valid."
-          fi
+      - name: Get PR Author
+        id: get-author
+        run: echo "author=$(jq -r '.pull_request.user.login' < ${GITHUB_EVENT_PATH})" >> $GITHUB_ENV
+
+      - name: Skip job for bot PRs
+        if: ${{ env.author == 'github-actions[bot]' }}
+        run: echo "Skipping job for bot PRs" && exit 0
 
       - name: Get changed files
         id: changed-files
@@ -41,20 +38,26 @@ jobs:
           fi
 
       - name: Validate newsfragment file names
+        id: validate_names
         run: |
           BRANCH_NAME=${{ github.event.pull_request.head.ref }}
-          PREFIX=$(echo "$BRANCH_NAME" | sed -E 's/((AQC|TQA|BUGFIX|QNO)-[0-9]+).*/\1/')
+          BRANCH_NUMBER=$(echo "$BRANCH_NAME" | sed -E 's/.*-([0-9]+).*/\1/')
           INVALID_FILES=""
-          for file in $(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | grep '^newsfragments/'); do
+          for file in $(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | grep '^newsfragments/' | grep -v '.gitignore'); do
             BASENAME=$(basename "$file")
-            if [[ ! "$BASENAME" =~ ^$PREFIX\..* ]]; then
+            if [[ ! "$BASENAME" =~ ^.*-$BRANCH_NUMBER\..* ]]; then
               INVALID_FILES="$INVALID_FILES\n$file"
             fi
           done
 
-          if [ -n "$INVALID_FILES" ]; then
-            echo -e "The following newsfragment files have invalid names:$INVALID_FILES"
-            exit 1
-          else
-            echo "All newsfragment files have valid names."
-          fi
+          echo "::set-output name=invalid_files::$INVALID_FILES"
+
+      - name: Create comment on PR if invalid files
+        if: steps.validate_names.outputs.invalid_files != ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            The following newsfragment files have invalid names:${{ steps.validate_names.outputs.invalid_files }}
+            Each file must match the pattern: *-JIRA-ticket-number.extension
+            Refer to the README.md for detailed validation criteria.
