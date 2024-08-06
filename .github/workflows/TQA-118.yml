@@ -1,4 +1,3 @@
-
 name: TQA-118
 on:
   workflow_dispatch:
@@ -11,11 +10,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-
 # Generating Release Notes in NEWS.rst
   release_notes:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,14 +36,19 @@ jobs:
   github_release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: See current working directory
         run: pwd
-
       - name: List files for debugging
         run: ls -al
       - name: Read NEWS.rst
         id: read_release_notes
         run: |
+          if [ ! -f "NEWS.rst" ]; then
+            echo "ERROR: NEWS.rst file not found!"
+            exit 1
+          fi
           RELEASE_NOTES=$(cat "NEWS.rst")
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
