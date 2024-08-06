@@ -42,16 +42,14 @@ jobs:
         id: read_release_notes
         run: |
           RELEASE_NOTES=$(cat "NEWS.rst")
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
 
       - name: Read version from VERSION.txt
         id: read_version
         run: |
           VERSION=$(cat "code/django/VERSION.txt")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
