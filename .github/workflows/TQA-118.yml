@@ -54,6 +54,10 @@ jobs:
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
+      - name: Read version from GITHUB_ENV
+        id: read_env_version
+        run: echo "VERSION=${VERSION}"
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
