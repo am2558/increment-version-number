@@ -38,17 +38,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: See current working directory
-        run: pwd
-      - name: List files for debugging
-        run: ls -al
       - name: Read NEWS.rst
         id: read_release_notes
         run: |
-          if [ ! -f "NEWS.rst" ]; then
-            echo "ERROR: NEWS.rst file not found!"
-            exit 1
-          fi
           RELEASE_NOTES=$(cat "NEWS.rst")
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
@@ -59,6 +51,7 @@ jobs:
         run: |
           VERSION=$(cat "code/django/VERSION.txt")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
