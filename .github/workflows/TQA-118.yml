@@ -54,10 +54,11 @@ jobs:
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Read version from GITHUB_ENV
-        id: read_env_version
-        run: echo "VERSION=${VERSION}"
-
+      - name: Read version from VERSION.txt
+        id: read_version
+        run: |
+          VERSION=$(cat "code/django/VERSION.txt")
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
