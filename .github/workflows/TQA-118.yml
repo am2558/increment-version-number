@@ -42,7 +42,9 @@ jobs:
         id: read_release_notes
         run: |
           RELEASE_NOTES=$(cat "NEWS.rst")
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
+
 
       - name: Read version from VERSION.txt
         id: read_version
