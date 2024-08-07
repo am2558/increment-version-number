@@ -38,12 +38,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Read NEWS.rst
         id: read_release_notes
         run: |
+          if [ ! -f "NEWS.rst" ]; then
+            echo "ERROR: NEWS.rst file not found!"
+            exit 1
+          fi
           RELEASE_NOTES=$(cat "NEWS.rst")
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "RELEASE_NOTES=${RELEASE_NOTES}" >> $GITHUB_ENV
 
 
       - name: Read version from VERSION.txt
