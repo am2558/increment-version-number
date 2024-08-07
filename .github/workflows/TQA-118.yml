@@ -41,7 +41,6 @@ jobs:
             exit 1
           fi
           RELEASE_NOTES=$(cat "NEWS.rst")
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
 
 
