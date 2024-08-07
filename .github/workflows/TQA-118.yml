@@ -63,6 +63,13 @@ jobs:
           body: ${{ env.RELEASE_NOTES }}
           draft: false
           prerelease: false
+
+      - name: Clear contents of NEWS.rst and newsfragments
+        run: | 
+          > code/django/NEWS.rst
+          find newsfragments -type f ! -name '.gitignore' -delete
+
+
       - name: Commit and Push Empty NEWS.rst
         uses: EndBug/add-and-commit@v9
         with:
