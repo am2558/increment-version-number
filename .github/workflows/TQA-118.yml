@@ -26,12 +26,6 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Read version from VERSION.txt
-        id: read_version
-        run: |
-          VERSION=$(cat "code/django/VERSION.txt")
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
  #Create GitHub Release
   github_release:
     runs-on: ubuntu-latest
@@ -47,7 +41,9 @@ jobs:
             exit 1
           fi
           RELEASE_NOTES=$(cat "NEWS.rst")
-          echo "RELEASE_NOTES=${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
 
       - name: Read version from VERSION.txt
