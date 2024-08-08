@@ -66,8 +66,8 @@ jobs:
 
       - name: Clear contents of NEWS.rst and newsfragments
         run: | 
-          echo "" > NEWS.rst
-          find newsfragments -type f ! -name '.gitignore' -delete
+          rm -rf newsfragments/!(.gitignore)
+          echo '' > NEWS.rst
 
 
       - name: Commit and Push Empty NEWS.rst
