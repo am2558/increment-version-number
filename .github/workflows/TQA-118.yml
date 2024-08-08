@@ -69,7 +69,6 @@ jobs:
           rm -rf newsfragments/!(.gitignore)
           echo '' > NEWS.rst
 
-
       - name: Commit and Push Empty NEWS.rst
         uses: EndBug/add-and-commit@v9
         with:
