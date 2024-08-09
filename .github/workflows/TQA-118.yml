@@ -40,6 +40,7 @@ jobs:
             echo "ERROR: NEWS.rst file not found!"
             exit 1
           fi
+          RELEASE_NOTES=$(cat "NEWS.rst")
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
 
 
