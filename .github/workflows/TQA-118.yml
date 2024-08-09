@@ -41,7 +41,7 @@ jobs:
             exit 1
           fi
           RELEASE_NOTES=$(cat "NEWS.rst")
-          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "RELEASE_NOTES =${RELEASE_NOTES}" >> $GITHUB_ENV
 
 
       - name: Read version from VERSION.txt
