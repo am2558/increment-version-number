@@ -41,7 +41,9 @@ jobs:
             exit 1
           fi
           RELEASE_NOTES=$(cat "NEWS.rst")
-          echo "RELEASE_NOTES=${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
 
       - name: Read version from VERSION.txt
@@ -62,31 +64,31 @@ jobs:
           draft: false
           prerelease: false
 
-      # - name: Clear contents of NEWS.rst and newsfragments
-      #   run: | 
-      #     rm -rf newsfragments/!(.gitignore)
-      #     echo '' > NEWS.rst
+      - name: Clear contents of NEWS.rst and newsfragments
+        run: | 
+          echo "" > NEWS.rst
+          find newsfragments -type f ! -name '.gitignore' -delete
 
 
-      # - name: Commit and Push Empty NEWS.rst
-      #   uses: EndBug/add-and-commit@v9
-      #   with:
-      #     ref: ${{ github.event.pull_request.head.ref }}
-      #     add: '["NEWS.rst", "newsfragments"]'
-      #     author_name: 'Github Actions - Release Notes Workflow'
-      #     author_email: actions@github.com
-      #     commit: --signoff
-      #     committer_name: 'Github Actions - Release Notes Workflow'
-      #     committer_email: actions@github.com
-      #     cwd: "."
-      #     default_author: github_actor
-      #     fetch: true
-      #     message: "Clear contents of NEWS.rst and newsfragments"
-      #     pathspec_error_handling: exitImmediately
-      #     push: true
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
-      #     message: "Clear contents of NEWS.rst and newsfragments"
-      #     pathspec_error_handling: exitImmediately
-      #     push: true
+      - name: Commit and Push Empty NEWS.rst
+        uses: EndBug/add-and-commit@v9
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          add: '["NEWS.rst", "newsfragments"]'
+          author_name: 'Github Actions - Release Notes Workflow'
+          author_email: actions@github.com
+          commit: --signoff
+          committer_name: 'Github Actions - Release Notes Workflow'
+          committer_email: actions@github.com
+          cwd: "."
+          default_author: github_actor
+          fetch: true
+          message: "Clear contents of NEWS.rst and newsfragments"
+          pathspec_error_handling: exitImmediately
+          push: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
+          message: "Clear contents of NEWS.rst and newsfragments"
+          pathspec_error_handling: exitImmediately
+          push: true
       
