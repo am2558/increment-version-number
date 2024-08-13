@@ -51,7 +51,7 @@ jobs:
         run: |
           VERSION=$(cat "code/django/VERSION.txt")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
+ 
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -60,7 +60,7 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           release_name: ${{ env.VERSION }}
-          body: ${{ env.RELEASE_NOTES }}
+          body_path: "NEWS.rst" 
           draft: false
           prerelease: false
 
@@ -68,7 +68,6 @@ jobs:
         run: | 
           echo "" > NEWS.rst
           find newsfragments -type f ! -name '.gitignore' -delete
-
 
       - name: Commit and Push Empty NEWS.rst
         uses: EndBug/add-and-commit@v9
@@ -88,7 +87,3 @@ jobs:
           push: true
         env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
-          message: "Clear contents of NEWS.rst and newsfragments"
-          pathspec_error_handling: exitImmediately
-          push: true
-      
