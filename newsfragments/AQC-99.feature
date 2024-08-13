@@ -1,1 +1,0 @@
-This ticket involved the completion of a feature. 
