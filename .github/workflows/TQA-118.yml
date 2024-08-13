@@ -26,31 +26,11 @@ jobs:
         with:
           python-version: '3.x'
 
- #Create GitHub Release
-  github_release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Read NEWS.rst
-        id: read_release_notes
-        run: |
-          if [ ! -f "NEWS.rst" ]; then
-            echo "ERROR: NEWS.rst file not found!"
-            exit 1
-          fi
-          RELEASE_NOTES=$(cat "NEWS.rst")
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-
-      - name: Read version from VERSION.txt
-        id: read_version
-        run: |
-          VERSION=$(cat "code/django/VERSION.txt")
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+      # - name: Read version from VERSION.txt
+      #   id: read_version
+      #   run: |
+      #     VERSION=$(cat "code/django/VERSION.txt")
+      #     echo "VERSION=${VERSION}" >> $GITHUB_ENV
  
       - name: Create GitHub Release
         id: create_release
@@ -58,8 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: ${{ env.VERSION }}
+          tag_name: "code/django/VERSION.txt"
+          release_name: "code/django/VERSION.txt"
           body_path: "NEWS.rst" 
           draft: false
           prerelease: false
