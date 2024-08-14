@@ -24,7 +24,7 @@ jobs:
           git commit -m "Add test file for bot PR"
 
       - name: Push the new branch
-        run: git push origin bot-test-branch
+        run: git push origin bot-testing
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
